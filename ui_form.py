@@ -36,20 +36,20 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.read_1_button)
 
-        self.pushButton_2 = QPushButton(self.groupBox)
-        self.pushButton_2.setObjectName(u"pushButton_2")
+        self.read_2_button = QPushButton(self.groupBox)
+        self.read_2_button.setObjectName(u"read_2_button")
 
-        self.verticalLayout.addWidget(self.pushButton_2)
+        self.verticalLayout.addWidget(self.read_2_button)
 
-        self.pushButton_3 = QPushButton(self.groupBox)
-        self.pushButton_3.setObjectName(u"pushButton_3")
+        self.read_3_button = QPushButton(self.groupBox)
+        self.read_3_button.setObjectName(u"read_3_button")
 
-        self.verticalLayout.addWidget(self.pushButton_3)
+        self.verticalLayout.addWidget(self.read_3_button)
 
-        self.pushButton_4 = QPushButton(self.groupBox)
-        self.pushButton_4.setObjectName(u"pushButton_4")
+        self.read_4_button = QPushButton(self.groupBox)
+        self.read_4_button.setObjectName(u"read_4_button")
 
-        self.verticalLayout.addWidget(self.pushButton_4)
+        self.verticalLayout.addWidget(self.read_4_button)
 
         self.groupBox_2 = QGroupBox(self.centralwidget)
         self.groupBox_2.setObjectName(u"groupBox_2")
@@ -61,20 +61,20 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_2.addWidget(self.write_1_button)
 
-        self.pushButton_6 = QPushButton(self.groupBox_2)
-        self.pushButton_6.setObjectName(u"pushButton_6")
+        self.write_2_button = QPushButton(self.groupBox_2)
+        self.write_2_button.setObjectName(u"write_2_button")
 
-        self.verticalLayout_2.addWidget(self.pushButton_6)
+        self.verticalLayout_2.addWidget(self.write_2_button)
 
-        self.pushButton_7 = QPushButton(self.groupBox_2)
-        self.pushButton_7.setObjectName(u"pushButton_7")
+        self.write_3_button = QPushButton(self.groupBox_2)
+        self.write_3_button.setObjectName(u"write_3_button")
 
-        self.verticalLayout_2.addWidget(self.pushButton_7)
+        self.verticalLayout_2.addWidget(self.write_3_button)
 
-        self.pushButton_8 = QPushButton(self.groupBox_2)
-        self.pushButton_8.setObjectName(u"pushButton_8")
+        self.write_4_button = QPushButton(self.groupBox_2)
+        self.write_4_button.setObjectName(u"write_4_button")
 
-        self.verticalLayout_2.addWidget(self.pushButton_8)
+        self.verticalLayout_2.addWidget(self.write_4_button)
 
         self.label = QLabel(self.centralwidget)
         self.label.setObjectName(u"label")
@@ -98,14 +98,14 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"Reading ", None))
         self.read_1_button.setText(QCoreApplication.translate("MainWindow", u"(V / L) Parameter", None))
-        self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"S Parameter", None))
-        self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"G Parameter", None))
-        self.pushButton_4.setText(QCoreApplication.translate("MainWindow", u"Others ", None))
+        self.read_2_button.setText(QCoreApplication.translate("MainWindow", u"S Parameter", None))
+        self.read_3_button.setText(QCoreApplication.translate("MainWindow", u"G Parameter", None))
+        self.read_4_button.setText(QCoreApplication.translate("MainWindow", u"Others ", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("MainWindow", u"Writing", None))
         self.write_1_button.setText(QCoreApplication.translate("MainWindow", u"(V / L) Parameter", None))
-        self.pushButton_6.setText(QCoreApplication.translate("MainWindow", u"S Parameter", None))
-        self.pushButton_7.setText(QCoreApplication.translate("MainWindow", u"G Parameter", None))
-        self.pushButton_8.setText(QCoreApplication.translate("MainWindow", u"Others ", None))
+        self.write_2_button.setText(QCoreApplication.translate("MainWindow", u"S Parameter", None))
+        self.write_3_button.setText(QCoreApplication.translate("MainWindow", u"G Parameter", None))
+        self.write_4_button.setText(QCoreApplication.translate("MainWindow", u"Others ", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Rework Program for T24", None))
     # retranslateUi
 

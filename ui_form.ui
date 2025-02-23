@@ -35,21 +35,21 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="read_2_button">
        <property name="text">
         <string>S Parameter</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="read_3_button">
        <property name="text">
         <string>G Parameter</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_4">
+      <widget class="QPushButton" name="read_4_button">
        <property name="text">
         <string>Others </string>
        </property>
@@ -78,21 +78,21 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_6">
+      <widget class="QPushButton" name="write_2_button">
        <property name="text">
         <string>S Parameter</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_7">
+      <widget class="QPushButton" name="write_3_button">
        <property name="text">
         <string>G Parameter</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_8">
+      <widget class="QPushButton" name="write_4_button">
        <property name="text">
         <string>Others </string>
        </property>

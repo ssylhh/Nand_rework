@@ -23,10 +23,12 @@ class MainWindow(QMainWindow):
         # self.ui.read_1_button = QPushButton("Read NAND YB1", self)
         # self.ui.read_1_button.setGeometry(20, 20, 180, 30)
         self.ui.read_1_button.clicked.connect(self.read_nand_yb1)
+        self.ui.read_2_button.clicked.connect(self.readNANDLParam)
 
         # self.ui.write_1_button = QPushButton("Write NAND YB1", self)
         # self.ui.write_nand_button.setGeometry(20, 60, 180, 30)
         self.ui.write_1_button.clicked.connect(self.write_nand_yb1)
+        self.ui.write_2_button.clicked.connect(self.writeNANDLParam)
 
         # self.ui.erase_nand_button = QPushButton("Erase NAND YB1", self)
         # self.ui.erase_nand_button.setGeometry(20, 100, 180, 30)
@@ -40,7 +42,7 @@ class MainWindow(QMainWindow):
         self.ui.log_output.setGeometry(120, 350, 440, 130)
         # self.ui.log_output.setReadOnly(True)
 
-        # self.pot = socketPot.PotConnection()
+        self.pot = socketPot.PotConnection()
         # self.pot.connect()
 
     def log_message(self, message):
@@ -55,7 +57,7 @@ class MainWindow(QMainWindow):
     #     )
 
     def read_nand_yb1(self):
-        """ NAND YB1 데이터 읽기 """
+
         # print("*******")
         
         try:
@@ -69,7 +71,7 @@ class MainWindow(QMainWindow):
             self.log_message(f"Error: {e}")
 
     def write_nand_yb1(self):
-        """ NAND YB1 데이터 쓰기 """
+
         try:
             self.log_message("Writing NAND YB1...")
             self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
@@ -82,7 +84,7 @@ class MainWindow(QMainWindow):
             self.log_message(f"Error: {e}")
 
     def erase_nand_yb1(self):
-        """ NAND YB1 데이터 삭제 """
+
         try:
             self.log_message("Erasing NAND YB1...")
             self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
@@ -92,8 +94,84 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.log_message(f"Error: {e}")
 
+    def readNANDLParam(self):
+
+        try:
+            self.log_message("Reading L Parameter...")
+            # self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            # self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_LPARAM, lineNumber = 0, dataType = 'setting')
+            # self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("L Parameter reading completed.")                        
+            self.save_dc_lut_as_ini(dc, "output/[L Parmeter] Rework.ini")                         
+                          
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+
+    def writeNANDLParam(self):
+
+        try:
+            self.log_message("Writing L Parameter...")
+            self.load_dc_lut_from_ini(dc, "output/[L Parmeter] Rework.ini")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_LPARAM)
+            self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_LPARAM, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("Writing L parameter completed.")
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+
+    def save_dc_lut_as_ini(self, dc, file_path):  
+
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write("[LUT_FIRST_ROW]\n")  
+
+            first_row = dc.lut[0]  
+            for index, value in enumerate(first_row):  
+                f.write(f"{index}={format(int(value), 'X')}\n")  
+
+# for multi Lut parameter as V parameter block
+    def save_dc_Luts_as_ini(self, dc, file_path):  
+
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w", encoding="utf-8") as f:
+            for i, row in enumerate(dc.lut):  
+                f.write(f"[LUT_{i}]\n")
+                for index, value in enumerate(row):  
+                    f.write(f"{index}={format(value, 'X')}\n")
+                f.write("\n")  
+
+        # with open(file_path, "w", encoding="utf-8") as f:
+        #     for i, row in enumerate(dc.lineBuffer):  
+        #         f.write(f"[lineBuffer_{i}]\n")
+        #         for index, value in enumerate(row):  
+        #             f.write(f"{index}={format(value, 'X')}\n")
+        #         f.write("\n")  
+
+    def load_dc_lut_from_ini(self, dc, file_path):
+        
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            first_row = []
+
+            for line in f:
+                line = line.strip()
+                if line.startswith("[") and line.endswith("]"):  
+                    continue  
+                if "=" in line:  
+                    _, value = line.split("=")  
+                    first_row.append(int(value, 16))  
+
+        dc.lut[0] = first_row
+
+
+
     def save_csv(self):
-        """ 데이터 CSV로 저장 """
+
         try:
             options = QFileDialog.Options()
             file_path, _ = QFileDialog.getSaveFileName(self, "Save CSV", "output/data.csv", "CSV Files (*.csv)", options=options)
@@ -108,6 +186,7 @@ class MainWindow(QMainWindow):
                 self.log_message("Save cancelled.")
         except Exception as e:
             self.log_message(f"Error: {e}")
+            
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
