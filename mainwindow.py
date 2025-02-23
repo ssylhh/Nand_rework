@@ -206,7 +206,10 @@ class MainWindow(QMainWindow):
 
             first_row = dc.lut[0]  
             for index, value in enumerate(first_row):  
-                f.write(f"{index}={format(int(value), 'X')}\n")  
+                # f.write(f"{index}={format(int(value), 'X')}\n")  
+                # first_row.append(int(value))               
+                f.write(f"{index}={format(value, '02X')}\n")  
+                
 
 # for multi Lut parameter as V parameter block
     def save_dc_Luts_as_ini(self, dc, file_path):  
@@ -216,7 +219,8 @@ class MainWindow(QMainWindow):
             for i, row in enumerate(dc.lut):  
                 f.write(f"[LUT_{i}]\n")
                 for index, value in enumerate(row):  
-                    f.write(f"{index}={format(value, 'X')}\n")
+                    # f.write(f"{index}={format(value, 'X')}\n")
+                    f.write(f"{index}={format(value, '02X')}\n")
                 f.write("\n")  
 
         # with open(file_path, "w", encoding="utf-8") as f:
@@ -240,7 +244,8 @@ class MainWindow(QMainWindow):
                     continue  
                 if "=" in line:  
                     _, value = line.split("=")  
-                    first_row.append(int(value, 16))  
+                    # first_row.append(int(value))
+                    first_row.append(int(value, 16))
 
         dc.lut[0] = first_row
 
@@ -254,6 +259,7 @@ class MainWindow(QMainWindow):
                 writer = csv.writer(f)
                 for row in dc.lut:
                     writer.writerow(row)
+                    # writer.writerow([format(value, '02X') for value in row])  
         else:
             print("N.A. format")
 
@@ -265,7 +271,9 @@ class MainWindow(QMainWindow):
 
         with open(file_path, "r", newline="", encoding="utf-8") as f:
             reader = csv.reader(f)
-            dc.lut = [[int(value, 16) for value in row] for row in reader]
+            dc.lut = [[int(value) for value in row] for row in reader]
+            # dc.lut = [[int(value, 16) for value in row] for row in reader]
+            
 
     # def load_dc_lut_from_ini(self, dc, file_path):
     #     if not os.path.exists(file_path):
