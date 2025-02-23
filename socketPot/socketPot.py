@@ -10,6 +10,13 @@ from typing import Callable, Optional, Union, List
 
 from socketPot import singleton, paramPotCmd, globalMemory
 
+from PySide6.QtCore import QObject, Signal
+
+class SocketPotSignals(QObject):
+    log_signal = Signal(str)
+
+socket_pot_signals = SocketPotSignals()
+
 
 # decorator for retry POT connection more.
 def retry(retries = 3, timetosleep = 3):
@@ -45,6 +52,7 @@ class TransferSocket:
     def __init__(self) -> None:
         self.gv = globalMemory.GlobalVariableT24
         self.p = paramPotCmd.ParamPotCmd()
+
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # SOCK_STREAM은 TCP socket을 뜻함
         socket.setdefaulttimeout(1)
 
@@ -268,10 +276,12 @@ class PotConnection(metaclass = singleton.Singleton):
         self.__doneTrsetting = False
         PotConnection.__s = self.__initPLSocket()
         PotConnection.__t = self.__initTrSocket()
+        # socket_pot_signals.log_signal.emit("통신 초기화 작업중입니다")
 
 
     def connect(self) -> None:
         try:
+            # socket_pot_signals.log_signal.emit("통신 초기화중.....")
             PotConnection.__s = self.__initPLSocket()
             PotConnection.__s.potPLsetting()
             self.__donePLsetting = True
@@ -280,8 +290,11 @@ class PotConnection(metaclass = singleton.Singleton):
             self.__doneTrsetting = True
             logging.info(f"POT 통신이 연결되었습니다.")
         except Exception:
+            socket_pot_signals.log_signal.emit("POT 통신 연결에 실패하였습니다")
             self.disconnect()
             logging.error(f"POT 통신 연결에 실패하였습니다.")
+            # self.socket_pot_signals.log_signal.emit("POT 통신 연결에 실패하였습니다")
+
             raise
 
 
