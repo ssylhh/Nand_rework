@@ -91,7 +91,8 @@ def eraseNANDLParam(pot):
 def readNANDSParam(pot):
 
     pot.writeTransferMono(cmd = gv.CMD_SET_PCMODE)
-    pot.readTransferLine(cmd = gv.CMD_RD_NAND_S_PARAM, lineNumber = 0, dataType = 'setting')
+    # pot.readTransferLine(cmd = gv.CMD_RD_NAND_S_PARAM, lineNumber = 0, dataType = 'setting')
+    pot.readTransferBurst(cmd = gv.CMD_RD_NAND_S_PARAM, dataType = 'sparaline')
     pot.writeTransferMono(cmd = gv.CMD_CLR_PCMODE)
 
 def writeNANDSParam(pot):
@@ -163,14 +164,6 @@ def save_dc_lut_as_ini(dc, file_path):
 
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-    # with open(file_path, "w", encoding="utf-8") as f:
-    #     for i, row in enumerate(dc.lut):  
-    #         f.write(f"[LUT_{i}]\n")
-    #         for index, value in enumerate(row):  
-    #             f.write(f"{index}={format(value, 'X')}\n")
-    #         f.write("\n")  
-
-
     with open(file_path, "w", encoding="utf-8") as f:
         f.write("[LUT_FIRST_ROW]\n")  
 
@@ -179,12 +172,24 @@ def save_dc_lut_as_ini(dc, file_path):
             f.write(f"{index}={format(int(value), 'X')}\n")  
 
 
+def save_dc_Luts_as_ini(dc, file_path):  
+
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        for i, row in enumerate(dc.lut):  
+            f.write(f"[LUT_{i}]\n")
+            for index, value in enumerate(row):  
+                f.write(f"{index}={format(value, 'X')}\n")
+            f.write("\n")  
+
     # with open(file_path, "w", encoding="utf-8") as f:
     #     for i, row in enumerate(dc.lineBuffer):  
     #         f.write(f"[lineBuffer_{i}]\n")
     #         for index, value in enumerate(row):  
     #             f.write(f"{index}={format(value, 'X')}\n")
     #         f.write("\n")  
+
 
 
 def load_dc_lut_from_ini(dc, file_path):
@@ -205,6 +210,30 @@ def load_dc_lut_from_ini(dc, file_path):
     dc.lut[0] = first_row
 
 
+def load_dc_Luts_from_ini(self, dc, file_path):
+
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    dc.lut = []  
+    current_row = None  
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith("[") and line.endswith("]"):                      
+                if current_row is not None:
+                    dc.lut.append(current_row)
+                current_row = []  
+            elif "=" in line and current_row is not None:  
+                _, value = line.split("=")
+                current_row.append(int(value, 16))  
+
+        if current_row is not None:
+            dc.lut.append(current_row)
+
+
+
 def save_dc_lut_as_csv(dc, file_path, format):    
 
     os.makedirs(os.path.dirname(file_path), exist_ok=True)  
@@ -217,6 +246,43 @@ def save_dc_lut_as_csv(dc, file_path, format):
     else:
         print("N.A. format")
 
+def save_dc_lut_as_csv_for_spara(dc, file_path, format):    
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)  
+
+    if format == "csv":
+        with open(file_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            for row in dc.lut[:2]:  
+                writer.writerow(row)
+    else:
+        print("N.A. format")
+
+
+def load_dc_lut_from_csv(dc, file_path):
+    
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    with open(file_path, "r", newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        dc.lut = [[int(value) for value in row] for row in reader]
+        # dc.lut = [[int(value, 16) for value in row] for row in reader]
+
+
+def load_dc_lut_from_csv_for_spara(dc, file_path):
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    with open(file_path, "r", newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        new_lut = []
+        
+        for i, row in enumerate(reader):
+            if i >= 2:  
+                break
+            new_lut.append([int(value) for value in row])  
+
+    dc.lut[:2] = new_lut
 
 
 
@@ -263,14 +329,28 @@ if __name__ == '__main__':
     # load_dc_lut_from_ini(dc, "output/[OC1_Flag] rework.ini")
     # writeNANDOC1Flag(pot)
 
-    readNANDLParam(pot) 
-    save_dc_lut_as_ini(dc, "output/[L Parmeter] rework.ini")
+    # readNANDLParam(pot) 
+    # save_dc_lut_as_ini(dc, "output/[L Parmeter] rework.ini")
 
-    writeNANDLParam(pot)
-    load_dc_lut_from_ini(dc, "output/[L Parmeter] rework.ini")
+    # readNANDLGDVparam(pot) 
+    # save_dc_Luts_as_ini(dc, "output/[V Parmeter] rework.ini")
 
-    # readNANDSParam(pot)
-    # save_dc_lut_as_csv(dc, "output/[S Parmeter] rework.csv", format="csv")
+    # writeNANDLParam(pot)
+    # load_dc_lut_from_ini(dc, "output/[L Parmeter] rework.ini")
+
+    readNANDSParam(pot)
+    save_dc_lut_as_csv_for_spara(dc, "output/[S Parmeter] rework.csv", format="csv")
+
+    # save_dc_Luts_as_ini(dc, "output/[S Parmeter] rework.ini")
+    # save_dc_lut_as_ini(dc, "output/[S Parmeter] rework.ini")
+
+    # readNANDLParam(pot) 
+    # save_dc_lut_as_ini(dc, "output/[L Parmeter] rework.ini")
+
+    # load_dc_lut_from_csv_for_spara(dc,"output/[S Parmeter] rework.csv")
+    # writeNANDSParam(pot) 
+
+    
 
     # print(f"dc.lut[0][0]: {dc.lut[0][0]}") # T24
     # print(f"dc.vParam[0]: {dc.vParam[0]}") # T26

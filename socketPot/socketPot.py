@@ -448,6 +448,9 @@ class PotConnection(metaclass = singleton.Singleton):
         elif dataType.lower() == 'apg':
             sline = 0
             nline = self.gv.APG_LINE
+        elif dataType.lower() == 'sparaline':
+            sline = 0
+            nline = 2
         else:
             sline = 0
             nline = self.gv.nrow
@@ -493,6 +496,8 @@ class PotConnection(metaclass = singleton.Singleton):
                     byteArr = self.__apg2byteArray(row = i)
                 elif dataType.lower() == 'setting':
                     byteArr = self.__setting2byteArray(order = i)
+                elif dataType.lower() == 'sparaline':
+                    byteArr = self.__setting2byteArray(order = i)                    
                 else:
                     raise Exception(f"dataType이 적절하지 않습니다.\n>> dataType : {dataType}")
                 # POT socket write command
@@ -525,6 +530,9 @@ class PotConnection(metaclass = singleton.Singleton):
         elif dataType.lower() == 'apg':
             sline = 0
             nline = self.gv.APG_LINE
+        elif dataType.lower() == 'sparaline':
+            sline = 0
+            nline = 2
         else:
             sline = 0
             nline = self.gv.nrow
@@ -571,6 +579,8 @@ class PotConnection(metaclass = singleton.Singleton):
                 elif dataType.lower() == 'apg':
                     self.__byteArray2apg(row = i, byteArr = byteArr)
                 elif dataType.lower() == 'setting':
+                    self.__byteArray2setting(order = i, byteArr = byteArr)
+                elif dataType.lower() == 'sparaline':
                     self.__byteArray2setting(order = i, byteArr = byteArr)
                 else:
                     raise Exception(f"dataType이 적절하지 않습니다.\n>> dataType : {dataType}")
@@ -836,22 +846,40 @@ class PotConnection(metaclass = singleton.Singleton):
         self.dc.APGContainer[row, :] = [byteArr[i] for i in range(LINE_LENGTH)]
 
 
-    def __byteArray2setting(self, order :int, byteArr :bytearray) -> None:
-        r"""
-        Description
-        -----------
-        1. This transfer bytearray to Global Data Container setting LUT.
-        2. This is one line data process.
-        """
+    # def __byteArray2setting(self, order :int, byteArr :bytearray) -> None:
+    #     r"""
+    #     Description
+    #     -----------
+    #     1. This transfer bytearray to Global Data Container setting LUT.
+    #     2. This is one line data process.
+    #     """
+    #     if self.gv.ASIC_MODEL in ['T26']:
+    #         lut = self.dc.vParam
+    #         LINE_LENGTH = 30720
+    #     else:
+    #         lut = self.dc.lut[order]
+    #         LINE_LENGTH = self.gv.LINE_LENGTH
+    #     for col in range(0, LINE_LENGTH):
+    #         # Global Data Container update
+    #         lut[col] = byteArr[col]
+
+
+    def __byteArray2setting(self, order: int, byteArr: bytearray) -> None:
+        
+        # lhh testing point to erase before downloading
         if self.gv.ASIC_MODEL in ['T26']:
+            self.dc.vParam = [0] * 30720  
             lut = self.dc.vParam
             LINE_LENGTH = 30720
         else:
+            self.dc.lut[order] = [0] * self.gv.LINE_LENGTH  
             lut = self.dc.lut[order]
             LINE_LENGTH = self.gv.LINE_LENGTH
-        for col in range(0, LINE_LENGTH):
-            # Global Data Container update
-            lut[col] = byteArr[col]
+
+        if len(byteArr) < LINE_LENGTH:
+            raise ValueError(f"byteArr length ({len(byteArr)}) is shorter than LINE_LENGTH ({LINE_LENGTH})")
+
+        lut[:LINE_LENGTH] = byteArr[:LINE_LENGTH]
 
 
     def __setting2byteArray(self, order :int) -> bytearray:
