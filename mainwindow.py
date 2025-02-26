@@ -28,17 +28,24 @@ class MainWindow(QMainWindow):
         # self.ui.read_1_button.setGeometry(20, 20, 180, 30)
         # self.ui.read_1_button.clicked.connect(self.read_nand_yb1)        
         
-        self.ui.read_1_button.clicked.connect(self.readNANDVParam)
-        self.ui.read_4_button.clicked.connect(self.readNANDLParam)
+        # self.ui.read_1_button.clicked.connect(self.readNANDVParam)
+        self.ui.read_1_button.clicked.connect(self.read_1_button_click)
         self.ui.read_2_button.clicked.connect(self.readNANDSParam)
+        self.ui.read_3_button.clicked.connect(self.readNANDGParam)
+        # self.ui.read_4_button.clicked.connect(self.readNANDOSLBPRNGLUT)   
+        self.ui.read_4_button.clicked.connect(self.read_4_button_click)
+     
 
         # self.ui.write_1_button = QPushButton("Write NAND YB1", self)
         # self.ui.write_nand_button.setGeometry(20, 60, 180, 30)
         # self.ui.write_1_button.clicked.connect(self.write_nand_yb1)
         
-        self.ui.write_1_button.clicked.connect(self.writeNANDVParam)       
-        self.ui.write_4_button.clicked.connect(self.writeNANDLParam)
+        # self.ui.write_1_button.clicked.connect(self.writeNANDVParam)    
+        self.ui.write_1_button.clicked.connect(self.write_1_button_click)        
         self.ui.write_2_button.clicked.connect(self.writeNANDSParam)
+        self.ui.write_3_button.clicked.connect(self.writeNANDGParam)
+        # self.ui.write_4_button.clicked.connect(self.writeNANDOSLBPRNGLUT)
+        self.ui.write_4_button.clicked.connect(self.write_4_button_click)
 
         # self.ui.erase_nand_button = QPushButton("Erase NAND YB1", self)
         # self.ui.erase_nand_button.setGeometry(20, 100, 180, 30)
@@ -70,6 +77,39 @@ class MainWindow(QMainWindow):
     #         self.ui.log_output, "append",
     #         Qt.QueuedConnection, message
     #     )
+
+
+    def read_1_button_click(self):
+        self.readNANDVParam()
+        self.readNANDLParam()
+
+    def write_1_button_click(self):
+        self.writeNANDVParam()
+        self.writeNANDLParam()
+
+    def read_4_button_click(self):
+        self.readNANDVParam()
+        self.readNANDOSLBLUT1()
+        self.readNANDTargetLUT()
+
+        self.readNANDTempGainMap()
+        self.readNANDTempOffsetMap()
+        self.readNANDRemainTempMap()
+
+        self.readNANDWCAMap()
+        self.readNANDOSLBPRNGLUT()
+
+    def write_4_button_click(self):
+        self.writeNANDVParam()
+        self.writeNANDOLSBLUT1()
+        self.writeNANDTargetLUT()
+
+        self.writeNANDTempGainMap()
+        self.writeNANDTempOffsetMap()
+        self.writeNANDRemainTempMap()
+
+        self.writeNANDWCAMap()
+        self.writeNANDOSLBPRNGLUT()
 
     def read_nand_yb1(self):
 
@@ -113,11 +153,11 @@ class MainWindow(QMainWindow):
 
         try:
             self.log_message("Reading L Parameter...")
-            # self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
-            # self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_LPARAM, lineNumber = 0, dataType = 'setting')
-            # self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_LPARAM, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
             self.log_message("L Parameter reading completed.")                        
-            self.save_dc_lut_as_ini(dc, "output/[L Parmeter] Rework.ini")                         
+            self.save_dc_lut_as_ini(dc, "output/[L Parameter] Rework.ini")                         
                           
         except Exception as e:
             self.log_message(f"Error: {e}")
@@ -126,7 +166,7 @@ class MainWindow(QMainWindow):
 
         try:
             self.log_message("Writing L Parameter...")
-            self.load_dc_lut_from_ini(dc, "output/[L Parmeter] Rework.ini")
+            self.load_dc_lut_from_ini(dc, "output/[L Parameter] Rework.ini")
             self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
             self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_LPARAM)
             self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_LPARAM, lineNumber = 0, dataType = 'setting')
@@ -139,11 +179,12 @@ class MainWindow(QMainWindow):
 
         try:
             self.log_message("Reading S Parameter...")
-            # self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
             # self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_S_PARAM, lineNumber = 0, dataType = 'setting')
-            # self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.pot.readTransferBurst(cmd = gv.CMD_RD_NAND_S_PARAM, dataType = 'sparaline')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
             self.log_message("S Parameter reading completed.")                        
-            self.save_dc_lut_as_csv(dc, "output/[S Parmeter] Rework.csv", format = "csv")                         
+            self.save_dc_lut_as_csv_for_spara(dc, "output/[S Parameter] Rework.csv", format = "csv")                         
                           
         except Exception as e:
             self.log_message(f"Error: {e}")
@@ -152,21 +193,239 @@ class MainWindow(QMainWindow):
 
         try:
             self.log_message("Writing S Parameter...")
-            self.load_dc_lut_from_csv(dc, "output/[S Parmeter] Rework.csv")
+            self.load_dc_lut_from_csv_for_spara(dc, "output/[S Parameter] Rework.csv")
             self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
             self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_S_PARAM)
-            self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_S_PARAM, lineNumber = 0, dataType = 'setting')
+            # self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_S_PARAM, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferBurst(cmd = gv.CMD_WR_NAND_S_PARAM, dataType = 'sparaline')
             self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
             self.log_message("Writing S parameter completed.")
         except Exception as e:
             self.log_message(f"Error: {e}")
 
 
+    def readNANDGParam(self):
+
+        try:
+            self.log_message("Reading G Parameter...")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            # self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_G_PARAM, lineNumber = 0, dataType = 'setting')
+            self.pot.readTransferBurst(cmd = gv.CMD_RD_NAND_G_PARAM, dataType = 'sparaline')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("G Parameter reading completed.")                        
+            self.save_dc_lut_as_csv_for_spara(dc, "output/[G Parameter] Rework.csv", format = "csv")                         
+                          
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+    def writeNANDGParam(self):
+
+        try:
+            self.log_message("Writing G Parameter...")
+            self.load_dc_lut_from_csv_for_spara(dc, "output/[G Parameter] Rework.csv")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_G_PARAM)
+            # self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_G_PARAM, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferBurst(cmd = gv.CMD_WR_NAND_G_PARAM, dataType = 'sparaline')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("Writing G parameter completed.")
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+
+    def readNANDOSLBLUT1(self):
+
+        try:
+            self.log_message("Reading LGD OLSB LUT1...")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_LGD_OSLB_LUT1, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("LGD OSLB LUT1 reading completed.")                        
+            self.save_dc_lut_as_ini(dc, "output/[OLSB LUT1] Rework.ini")                         
+                          
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+    def writeNANDOLSBLUT1(self):
+
+        try:
+            self.log_message("Writing LGD OSLB LUT1...")
+            self.load_dc_lut_from_ini(dc, "output/[OLSB LUT1] Rework.ini")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_LGD_OSLB_LUT1)
+            self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_LGD_OSLB_LUT1, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("Writing LGD OSLB LUT1 completed.")
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+
+    def readNANDTargetLUT(self):
+
+        try:
+            self.log_message("Reading Target LUT...")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_LGD_OSLB_Target_LUT, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("LGD Target LUT reading completed.")                        
+            self.save_dc_lut_as_ini(dc, "output/[Target LUT] Rework.ini")                         
+                          
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+    def writeNANDTargetLUT(self):
+
+        try:
+            self.log_message("Writing LGD Target LUT...")
+            self.load_dc_lut_from_ini(dc, "output/[Target LUT] Rework.ini")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_LGD_OSLB_Target_LUT)
+            self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_LGD_OSLB_Target_LUT, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("Writing LGD Target LUT completed.")
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+
+    def readNANDTempGainMap(self):
+
+        try:
+            self.log_message("Reading Temp Gain Map...")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_LGD_TEMP_Gain_MAP, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("LGD Temp Gain Map reading completed.")                        
+            self.save_dc_lut_as_ini(dc, "output/[Temp Gain MAP] Rework.ini")                         
+                          
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+    def writeNANDTempGainMap(self):
+
+        try:
+            self.log_message("Writing Temp Gain Map...")
+            self.load_dc_lut_from_ini(dc, "output/[Temp Gain Map] Rework.ini")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_LGD_TEMP_Gain_MAP)
+            self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_LGD_TEMP_Gain_MAP, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("Writing Temp Gain Map completed.")
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+
+    def readNANDTempOffsetMap(self):
+
+        try:
+            self.log_message("Reading Temp Offset Map...")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_LGD_TEMP_Offset_MAP, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("LGD Temp Offset Map reading completed.")                        
+            self.save_dc_lut_as_ini(dc, "output/[Temp Offset MAP] Rework.ini")                         
+                          
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+    def writeNANDTempOffsetMap(self):
+
+        try:
+            self.log_message("Writing Temp Offset Map...")
+            self.load_dc_lut_from_ini(dc, "output/[Temp Offset Map] Rework.ini")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_LGD_TEMP_Offset_MAP)
+            self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_LGD_TEMP_Offset_MAP, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("Writing Temp Offset Map completed.")
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+    def readNANDRemainTempMap(self):
+
+        try:
+            self.log_message("Reading Remain Temp Map...")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_LGD_Remain_TEMP_MAP, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("LGD Remain Temp Map reading completed.")                        
+            self.save_dc_lut_as_ini(dc, "output/[Remain Temp MAP] Rework.ini")                         
+                          
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+    def writeNANDRemainTempMap(self):
+
+        try:
+            self.log_message("Writing Remain Temp Map...")
+            self.load_dc_lut_from_ini(dc, "output/[Remain Temp Map] Rework.ini")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_LGD_Remain_TEMP_MAP)
+            self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_LGD_Remain_TEMP_MAP, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("Writing Remain Temp Map completed.")
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+    def readNANDWCAMap(self):
+
+        try:
+            self.log_message("Reading WCA Map...")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_LGD_WCA_MAP, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("LGD WCA Map reading completed.")                        
+            self.save_dc_lut_as_ini(dc, "output/[WCA MAP] Rework.ini")                         
+                          
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+    def writeNANDWCAMap(self):
+
+        try:
+            self.log_message("Writing WCA Map...")
+            self.load_dc_lut_from_ini(dc, "output/[WCA Map] Rework.ini")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_LGD_WCA_MAP)
+            self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_LGD_WCA_MAP, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("Writing WCA Map completed.")
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+
+    def readNANDOSLBPRNGLUT(self):
+
+        try:
+            self.log_message("Reading OSLB PRNG LUT...")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.readTransferLine(cmd = gv.CMD_RD_NAND_OSLB_PRNG_LUT, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("LGD OSLB PRNG LUT reading completed.")                        
+            self.save_dc_lut_as_ini(dc, "output/[OLSB PRNG LUT] Rework.ini")                         
+                          
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+    def writeNANDOSLBPRNGLUT(self):
+
+        try:
+            self.log_message("Writing OSLB PRNG LUT ...")
+            self.load_dc_lut_from_ini(dc, "output/[OLSB PRNG LUT] Rework.ini")
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_OSLB_PRNG_LUT)
+            self.pot.writeTransferLine(cmd = gv.CMD_WR_NAND_OSLB_PRNG_LUT, lineNumber = 0, dataType = 'setting')
+            self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
+            self.log_message("Writing OSLB PRNG LUT completed.")
+        except Exception as e:
+            self.log_message(f"Error: {e}")
+
+   
+
     def readNANDVParam(self):
 
         try:
             self.log_message("Reading V Parameter...")
-            # self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
+            self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
             if not gv.ASIC_MODEL in ['T26']:
                 self.pot.readTransferBurst(cmd = gv.CMD_RD_NAND_LGD_VPARAM, dataType = 'setting')
             else:
@@ -174,7 +433,7 @@ class MainWindow(QMainWindow):
             
             self.pot.writeTransferMono(cmd=gv.CMD_CLR_PCMODE)
             self.log_message("V Parameter reading completed.")                        
-            self.save_dc_Luts_as_ini(dc, "output/[V Parmeter] Rework.ini")                         
+            self.save_dc_Luts_as_ini(dc, "output/[V Parameter] Rework.ini")                         
                           
         except Exception as e:
             self.log_message(f"Error: {e}")
@@ -183,7 +442,12 @@ class MainWindow(QMainWindow):
 
         try:
             self.log_message("Writing V Parameter...")
-            self.load_dc_lut_from_csv(dc, "output/[V Parmeter] Rework.ini")
+
+            if not gv.ASIC_MODEL in ['T26']:
+                self.load_dc_Luts_from_ini(dc, "output/[V Parameter] Rework.ini")
+            else:
+                self.load_dc_lut_from_ini(dc, "output/[V Parameter] Rework.ini")
+
             self.pot.writeTransferMono(cmd=gv.CMD_SET_PCMODE)
             self.pot.writeTransferMono(cmd=gv.CMD_ER_NAND_LGD_VPARAM)
                         
@@ -250,6 +514,29 @@ class MainWindow(QMainWindow):
         dc.lut[0] = first_row
 
 
+    def load_dc_Luts_from_ini(self, dc, file_path):
+
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+
+        dc.lut = []  
+        current_row = None  
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("[") and line.endswith("]"):                      
+                    if current_row is not None:
+                        dc.lut.append(current_row)
+                    current_row = []  
+                elif "=" in line and current_row is not None:  
+                    _, value = line.split("=")
+                    current_row.append(int(value, 16))  
+
+            if current_row is not None:
+                dc.lut.append(current_row)
+
+
     def save_dc_lut_as_csv(self, dc, file_path, format):    
 
         os.makedirs(os.path.dirname(file_path), exist_ok=True)  
@@ -263,6 +550,18 @@ class MainWindow(QMainWindow):
         else:
             print("N.A. format")
 
+    def save_dc_lut_as_csv_for_spara(self, dc, file_path, format):    
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)  
+
+        if format == "csv":
+            with open(file_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                for row in dc.lut[:2]:  
+                    writer.writerow(row)
+        else:
+            print("N.A. format")
+
+
 
     def load_dc_lut_from_csv(self, dc, file_path):
         
@@ -273,7 +572,23 @@ class MainWindow(QMainWindow):
             reader = csv.reader(f)
             dc.lut = [[int(value) for value in row] for row in reader]
             # dc.lut = [[int(value, 16) for value in row] for row in reader]
+
+
+    def load_dc_lut_from_csv_for_spara(self, dc, file_path):
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+
+        with open(file_path, "r", newline="", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            new_lut = []
             
+            for i, row in enumerate(reader):
+                if i >= 2:  
+                    break
+                new_lut.append([int(value) for value in row])  
+
+        dc.lut[:2] = new_lut
+
 
     # def load_dc_lut_from_ini(self, dc, file_path):
     #     if not os.path.exists(file_path):

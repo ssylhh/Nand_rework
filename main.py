@@ -91,7 +91,8 @@ def eraseNANDLParam(pot):
 def readNANDSParam(pot):
 
     pot.writeTransferMono(cmd = gv.CMD_SET_PCMODE)
-    pot.readTransferLine(cmd = gv.CMD_RD_NAND_S_PARAM, lineNumber = 0, dataType = 'setting')
+    # pot.readTransferLine(cmd = gv.CMD_RD_NAND_S_PARAM, lineNumber = 0, dataType = 'setting')
+    pot.readTransferBurst(cmd = gv.CMD_RD_NAND_S_PARAM, dataType = 'sparaline')
     pot.writeTransferMono(cmd = gv.CMD_CLR_PCMODE)
 
 def writeNANDSParam(pot):
@@ -163,14 +164,6 @@ def save_dc_lut_as_ini(dc, file_path):
 
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-    # with open(file_path, "w", encoding="utf-8") as f:
-    #     for i, row in enumerate(dc.lut):  
-    #         f.write(f"[LUT_{i}]\n")
-    #         for index, value in enumerate(row):  
-    #             f.write(f"{index}={format(value, 'X')}\n")
-    #         f.write("\n")  
-
-
     with open(file_path, "w", encoding="utf-8") as f:
         f.write("[LUT_FIRST_ROW]\n")  
 
@@ -179,12 +172,24 @@ def save_dc_lut_as_ini(dc, file_path):
             f.write(f"{index}={format(int(value), 'X')}\n")  
 
 
+def save_dc_Luts_as_ini(dc, file_path):  
+
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        for i, row in enumerate(dc.lut):  
+            f.write(f"[LUT_{i}]\n")
+            for index, value in enumerate(row):  
+                f.write(f"{index}={format(value, 'X')}\n")
+            f.write("\n")  
+
     # with open(file_path, "w", encoding="utf-8") as f:
     #     for i, row in enumerate(dc.lineBuffer):  
     #         f.write(f"[lineBuffer_{i}]\n")
     #         for index, value in enumerate(row):  
     #             f.write(f"{index}={format(value, 'X')}\n")
     #         f.write("\n")  
+
 
 
 def load_dc_lut_from_ini(dc, file_path):
@@ -205,6 +210,30 @@ def load_dc_lut_from_ini(dc, file_path):
     dc.lut[0] = first_row
 
 
+def load_dc_Luts_from_ini(self, dc, file_path):
+
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    dc.lut = []  
+    current_row = None  
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith("[") and line.endswith("]"):                      
+                if current_row is not None:
+                    dc.lut.append(current_row)
+                current_row = []  
+            elif "=" in line and current_row is not None:  
+                _, value = line.split("=")
+                current_row.append(int(value, 16))  
+
+        if current_row is not None:
+            dc.lut.append(current_row)
+
+
+
 def save_dc_lut_as_csv(dc, file_path, format):    
 
     os.makedirs(os.path.dirname(file_path), exist_ok=True)  
@@ -217,7 +246,96 @@ def save_dc_lut_as_csv(dc, file_path, format):
     else:
         print("N.A. format")
 
+def save_dc_lut_as_csv_for_spara(dc, file_path, format):    
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)  
 
+    if format == "csv":
+        with open(file_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            for row in dc.lut[:2]:  
+                writer.writerow(row)
+    else:
+        print("N.A. format")
+
+
+def load_dc_lut_from_csv(dc, file_path):
+    
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    with open(file_path, "r", newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        dc.lut = [[int(value) for value in row] for row in reader]
+        # dc.lut = [[int(value, 16) for value in row] for row in reader]
+
+
+def load_dc_lut_from_csv_for_spara(dc, file_path):
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    with open(file_path, "r", newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        new_lut = []
+        
+        for i, row in enumerate(reader):
+            if i >= 2:  
+                break
+            new_lut.append([int(value) for value in row])  
+
+    dc.lut[:2] = new_lut
+
+
+def load_dc_lut_from_csv_for_2016(dc, file_path):
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    nrow = dc.rPhiContainer.shape[0]
+    ncol = dc.rPhiContainer.shape[1]
+    
+    print(f"ncol: {ncol}")
+    print(f"nrow: {nrow}")
+    
+    # 각 컨테이너에 데이터를 채우기 위한 변수들
+    # rPhiContainer = np.zeros((nrow, ncol), dtype=np.int16)
+    # rAlphaContainer = np.zeros((nrow, ncol), dtype=np.int16)
+    # wPhiContainer = np.zeros((nrow, ncol), dtype=np.int16)
+    # wAlphaContainer = np.zeros((nrow, ncol), dtype=np.int16)
+    # gPhiContainer = np.zeros((nrow, ncol), dtype=np.int16)
+    # gAlphaContainer = np.zeros((nrow, ncol), dtype=np.int16)
+    # bPhiContainer = np.zeros((nrow, ncol), dtype=np.int16)
+    # bAlphaContainer = np.zeros((nrow, ncol), dtype=np.int16)
+
+    with open(file_path, "r", newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        
+        for row_idx, row in enumerate(reader):
+            # 한 줄에 있는 값을 8개씩 처리
+            for col_idx in range(ncol):
+                # 각 항목을 10비트 및 6비트로 분리하여 할당
+                dc.rPhiContainer[row_idx, col_idx] = int(row[col_idx * 8 + 0]) 
+                dc.rAlphaContainer[row_idx, col_idx] = int(row[col_idx * 8 + 1]) 
+
+                dc.wPhiContainer[row_idx, col_idx] = int(row[col_idx * 8 + 2]) 
+                dc.wAlphaContainer[row_idx, col_idx] = int(row[col_idx * 8 + 3]) 
+
+                dc.gPhiContainer[row_idx, col_idx] = int(row[col_idx * 8 + 4]) 
+                dc.gAlphaContainer[row_idx, col_idx] = int(row[col_idx * 8 + 5]) 
+
+                dc.bPhiContainer[row_idx, col_idx] = int(row[col_idx * 8 + 6]) 
+                dc.bAlphaContainer[row_idx, col_idx] = int(row[col_idx * 8 + 7]) 
+
+
+    # # 메모리에 데이터를 할당
+    # dc.rPhiContainer = rPhiContainer
+    # dc.rAlphaContainer = rAlphaContainer
+    # dc.wPhiContainer = wPhiContainer
+    # dc.wAlphaContainer = wAlphaContainer
+    # dc.gPhiContainer = gPhiContainer
+    # dc.gAlphaContainer = gAlphaContainer
+    # dc.bPhiContainer = bPhiContainer
+    # dc.bAlphaContainer = bAlphaContainer
+    print(f"dc.rPhiContainer[0][0]: {dc.rPhiContainer[0][2]}")
+    print(f"dc.rAlphaContainer[0][0]: {dc.rAlphaContainer[0][2]}")
 
 
 # def write_dc_lut_as_ini(dc, file_path):
@@ -245,7 +363,8 @@ def save_dc_lut_as_csv(dc, file_path, format):
 
 if __name__ == '__main__':
     pot = socketPot.PotConnection()
-    pot.connect()
+    # pot.connect()
+    
     # test1 : NAND YB1 read
     #readNANDYB1(pot)
     #print(f"dc.rPhiContainer[0][0]: {dc.rPhiContainer[0][0]}")
@@ -263,14 +382,29 @@ if __name__ == '__main__':
     # load_dc_lut_from_ini(dc, "output/[OC1_Flag] rework.ini")
     # writeNANDOC1Flag(pot)
 
-    readNANDLParam(pot) 
-    save_dc_lut_as_ini(dc, "output/[L Parmeter] rework.ini")
+    # readNANDLParam(pot) 
+    # save_dc_lut_as_ini(dc, "output/[L Parmeter] rework.ini")
 
-    writeNANDLParam(pot)
-    load_dc_lut_from_ini(dc, "output/[L Parmeter] rework.ini")
+    # readNANDLGDVparam(pot) 
+    # save_dc_Luts_as_ini(dc, "output/[V Parmeter] rework.ini")
+
+    # writeNANDLParam(pot)
+    # load_dc_lut_from_ini(dc, "output/[L Parmeter] rework.ini")
 
     # readNANDSParam(pot)
-    # save_dc_lut_as_csv(dc, "output/[S Parmeter] rework.csv", format="csv")
+    # save_dc_lut_as_csv_for_spara(dc, "output/[S Parmeter] rework.csv", format="csv")
+
+    # save_dc_Luts_as_ini(dc, "output/[S Parmeter] rework.ini")
+    # save_dc_lut_as_ini(dc, "output/[S Parmeter] rework.ini")
+
+    # readNANDLParam(pot) 
+    # save_dc_lut_as_ini(dc, "output/[L Parmeter] rework.ini")
+
+    # load_dc_lut_from_csv_for_spara(dc,"output/[S Parmeter] rework.csv")
+    # writeNANDSParam(pot) 
+
+    load_dc_lut_from_csv_for_2016(dc,"output/[YB1 comp] Rework.csv")
+    
 
     # print(f"dc.lut[0][0]: {dc.lut[0][0]}") # T24
     # print(f"dc.vParam[0]: {dc.vParam[0]}") # T26
