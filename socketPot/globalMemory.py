@@ -19,7 +19,7 @@ class GlobalVariableT24:
 
     # POT Enviroment
     POT_IP = "192.168.0.7"                  # POT board IP 주소
-    PC_IP = "192.168.0.1"                  # PC IP 주소
+    PC_IP = "192.168.0.6"                  # PC IP 주소
     OP_PORTNUM = 4000                       # 일반 PC 명령어에 사용하는 포트
     PL_PORTNUM = 5000                       # Phase Lock 설정에 사용하는 포트
     PL_SETTING = "LGD_POT_A05_F08"          # Phase Lock 설정에 사용하는 Packet 값
@@ -435,7 +435,7 @@ class GlobalVariableT26:
 
     # POT Enviroment
     POT_IP = "192.168.0.7"                  # POT board IP 주소
-    PC_IP = "192.168.0.1"                  # PC IP 주소
+    PC_IP = "192.168.0.6"                  # PC IP 주소
     OP_PORTNUM = 4000                       # 일반 PC 명령어에 사용하는 포트
     PL_PORTNUM = 5000                       # Phase Lock 설정에 사용하는 포트
     PL_SETTING = "LGD_POT_A05_F08"          # Phase Lock 설정에 사용하는 Packet 값
